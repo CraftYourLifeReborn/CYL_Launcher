@@ -4,6 +4,8 @@
  */
 const { AZauth, Mojang } = require('minecraft-java-core');
 const { ipcRenderer } = require('electron');
+const CryptoJS = require("crypto-js");
+const crypto = require("crypto");
 
 import { popup, database, changePanel, accountSelect, addAccount, config, setStatus } from '../utils.js';
 
@@ -13,18 +15,121 @@ class Login {
         this.config = config;
         this.db = new database();
 
-        if (typeof this.config.online == 'boolean') {
+        /*if (typeof this.config.online == 'boolean') {
             this.config.online ? this.getMicrosoft() : this.getCrack()
         } else if (typeof this.config.online == 'string') {
             if (this.config.online.match(/^(http|https):\/\/[^ "]+$/)) {
                 this.getAZauth();
             }
-        }
+        }*/
+
+        this.getCYLAuth();
         
         document.querySelector('.cancel-home').addEventListener('click', () => {
             document.querySelector('.cancel-home').style.display = 'none'
             changePanel('settings')
         })
+    }
+
+    async getCYLAuth() {
+        console.log('Initializing CYLAuth login...');
+        let loginURL = "https://api.craftyourliferp.fr/connection_new.php"
+        let PopupLogin = new popup();
+        let loginAZauth = document.querySelector('.login-AZauth');
+        let loginAZauthA2F = document.querySelector('.login-AZauth-A2F');
+
+        let AZauthEmail = document.querySelector('.email-AZauth');
+        let AZauthPassword = document.querySelector('.password-AZauth');
+        let AZauthA2F = document.querySelector('.A2F-AZauth');
+        let connectAZauthA2F = document.querySelector('.connect-AZauth-A2F');
+        let AZauthConnectBTN = document.querySelector('.connect-AZauth');
+        let AZauthCancelA2F = document.querySelector('.cancel-AZauth-A2F');
+        
+        loginAZauth.style.display = 'block';
+        
+
+        AZauthConnectBTN.addEventListener('click', async () => {
+            PopupLogin.openPopup({
+                title: 'Connexion en cours...',
+                content: 'Veuillez patienter...',
+                color: 'var(--color)'
+            });
+
+            if (AZauthEmail.value == '' || AZauthPassword.value == '') {
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: 'Veuillez remplir tous les champs.',
+                    options: true
+                });
+                return;
+            }
+            let CYLauthConnect = await fetch(loginURL, {
+                method: "POST",
+                headers: {
+                    'Accept': '*/*',
+                    'Connection': 'keep-alive',
+                    'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
+                    'Content-Type': 'application/x-www-form-urlencoded' // Assuming form data
+                },
+                body: "pseudo=" + AZauthEmail.value + "&password=" + md5Hex(AZauthPassword.value) + "&cdata=C0LZcfoud05u1hqOtqtF,,"
+            })
+            if (!CYLauthConnect.ok) {
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: 'Une erreur ses produite veuiller contacter le support si elle perciste.',
+                    options: true
+                });
+                return;
+            }
+
+            CYLauthConnect = await CYLauthConnect.text();
+            console.log("test " + await CYLauthConnect)
+
+            if (CYLauthConnect === "too many attempts") {
+                console.log("Session incorrect");
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: 'Trop de tentative réessayez dans 10 minutes.',
+                    options: true
+                });
+                return;
+            } else if (CYLauthConnect === "newip") {
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: 'Une nouvelle ip a été détecté, un mail vous a été envoyé vous devez valider votre nouvelle ip (vérifiez vos spams).',
+                    options: true
+                });
+                return;
+            } else if (CYLauthConnect === "false") {
+                console.log("session incorrect");
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: 'Identifiants Incorrect.',
+                    options: true
+                });
+                return;
+            } else if (CYLauthConnect === "blacklisted") {
+                console.log("session incorrect");
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: 'Connexion impossible.',
+                    options: true
+                });
+                return;
+            } else if (CYLauthConnect != "true") {
+                console.log("Unexpected response:", CYLauthConnect);
+                PopupLogin.openPopup({
+                    title: 'Erreur',
+                    content: CYLauthConnect,
+                    options: true
+                });
+                return;
+            }
+            console.log("Session sucessfully obtained");
+            console.log(login(AZauthEmail.value, md5Hex(AZauthPassword.value)))
+            await this.saveData(await login(AZauthEmail.value, md5Hex(AZauthPassword.value)))
+            PopupLogin.closePopup();
+        });
     }
 
     async getMicrosoft() {
@@ -193,6 +298,7 @@ class Login {
 
     async saveData(connectionData) {
         let configClient = await this.db.readData('configClient');
+        console.log()
         let account = await this.db.createData('accounts', connectionData)
         let instanceSelect = configClient.instance_selct
         let instancesList = await config.getInstanceList()
@@ -212,9 +318,30 @@ class Login {
         }
 
         await this.db.updateData('configClient', configClient);
+        console.log(account)
         await addAccount(account);
         await accountSelect(account);
         changePanel('home');
+    }
+    
+}
+function md5Hex(password) {
+    return CryptoJS.MD5(password).toString(CryptoJS.enc.Hex);
+}
+
+async function login(username, password) {
+    let UUID = crypto.randomBytes(16).toString('hex');
+    return {
+        access_token: UUID,
+        client_token: UUID,
+        uuid: UUID,
+        name: username,
+        password: password,
+        user_properties: '{}',
+        meta: {
+            online: false,
+            type: 'CYL'
+        }
     }
 }
 export default Login;

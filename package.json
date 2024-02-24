@@ -1,20 +1,20 @@
 {
-    "name": "Selvania-Launcher",
-    "preductname": "Selvania Launcher",
-    "version": "2.0.0",
-    "description": "Launcher Mincraft pour le serveur Selvania",
+    "name": "CraftYourLifeRP-Launcher",
+    "preductname": "CraftYourLifeRP Launcher",
+    "version": "2.0.1",
+    "description": "Launcher pour le serveur CraftYourLifeRP Reborn",
     "main": "src/app.js",
     "author": {
         "name": "luuxis, Inc.",
         "email": "contact@luuxis.fr",
-        "url": "https://github.com/luuxis"
+        "url": "https://github.com/CraftYourLifeReborn"
     },
-    "url": "http://launcher.luuxis.fr/launcherSelvania",
+    "url": "http://163.5.107.107:25001/craftyourliferp/launcher/",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
         "build": "node build.js --obf=false --build=platform",
-        "icon": "node build.js --icon=https://raw.githubusercontent.com/luuxis/Selvania-Launcher/master/src/assets/images/icon.png"
+        "icon": "node build.js --icon=https://raw.githubusercontent.com/CraftYourLifeReborn/CYL_Launcher/master/src/assets/images/icon.png"
     },
     "license": "CCANC",
     "nodemonConfig": {
@@ -22,6 +22,7 @@
         "ignore": "**/test"
     },
     "dependencies": {
+        "crypto-js": "^4.2.0",
         "electron-updater": "^6.1.4",
         "minecraft-java-core": "^3.8.1",
         "node-bdd": "^2.0.3",
@@ -39,6 +40,6 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/luuxis/Selvania-Launcher.git"
+        "url": "git+https://github.com/CraftYourLifeReborn/CYL_Launcher.git"
     }
 }

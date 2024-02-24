@@ -139,6 +139,7 @@ class Launcher {
                     await this.db.deleteData('accounts', account_ID)
                     continue
                 }
+                console.log("Account " + account.meta)
                 if (account.meta.type === 'Xbox') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
                     popupRefresh.openPopup({
@@ -224,11 +225,11 @@ class Launcher {
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
                 } else {
                     console.error(`[Account] ${account.name}: Account Type Not Found`);
-                    this.db.deleteData('accounts', account_ID)
+                    /*this.db.deleteData('accounts', account_ID)
                     if (account_ID == account_selected) {
                         configClient.account_selected = null
                         this.db.updateData('configClient', configClient)
-                    }
+                    }*/
                 }
             }
 
