@@ -1,7 +1,7 @@
 {
     "name": "CraftYourLifeRP-Launcher",
     "preductname": "CraftYourLifeRP Launcher",
-    "version": "2.0.1",
+    "version": "1.0.0",
     "description": "Launcher pour le serveur CraftYourLifeRP Reborn",
     "main": "src/app.js",
     "author": {
