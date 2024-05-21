@@ -76,7 +76,7 @@ class Login {
             if (!CYLauthConnect.ok) {
                 PopupLogin.openPopup({
                     title: 'Erreur',
-                    content: 'Une erreur ses produite veuiller contacter le support si elle perciste.',
+                    content: "Une erreur s'est produite veuillez contacter le support si elle persiste.",
                     options: true
                 });
                 return;
