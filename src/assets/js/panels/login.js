@@ -33,7 +33,7 @@ class Login {
 
     async getCYLAuth() {
         console.log('Initializing CYLAuth login...');
-        let loginURL = "https://api.craftyourliferp.fr/connection_new.php"
+        let loginURL = "https://api.craftyourliferp.fr/auth/login"
         let PopupLogin = new popup();
         let loginAZauth = document.querySelector('.login-AZauth');
         let loginAZauthA2F = document.querySelector('.login-AZauth-A2F');
@@ -66,12 +66,12 @@ class Login {
             let CYLauthConnect = await fetch(loginURL, {
                 method: "POST",
                 headers: {
-                    'Accept': '*/*',
-                    'Connection': 'keep-alive',
-                    'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
-                    'Content-Type': 'application/x-www-form-urlencoded' // Assuming form data
+                    "Content-Type": "application/json"
                 },
-                body: "pseudo=" + AZauthEmail.value + "&password=" + md5Hex(AZauthPassword.value) + "&cdata=C0LZcfoud05u1hqOtqtF,,"
+                body: JSON.stringify({
+                    username: AZauthEmail.value,
+                    password: AZauthPassword.value
+                })
             })
             if (!CYLauthConnect.ok) {
                 PopupLogin.openPopup({
@@ -82,7 +82,7 @@ class Login {
                 return;
             }
 
-            CYLauthConnect = await CYLauthConnect.text();
+            CYLauthConnect = await CYLauthConnect.json();
             console.log("test " + await CYLauthConnect)
 
             if (CYLauthConnect === "too many attempts") {
@@ -116,17 +116,10 @@ class Login {
                     options: true
                 });
                 return;
-            } else if (CYLauthConnect != "true") {
-                console.log("Unexpected response:", CYLauthConnect);
-                PopupLogin.openPopup({
-                    title: 'Erreur',
-                    content: CYLauthConnect,
-                    options: true
-                });
-                return;
             }
+
             console.log("Session sucessfully obtained");
-            console.log(login(AZauthEmail.value, md5Hex(AZauthPassword.value)))
+            console.log(login(AZauthEmail.value, CYLauthConnect.access_token))
             await this.saveData(await login(AZauthEmail.value, md5Hex(AZauthPassword.value)))
             PopupLogin.closePopup();
         });
@@ -329,14 +322,13 @@ function md5Hex(password) {
     return CryptoJS.MD5(password).toString(CryptoJS.enc.Hex);
 }
 
-async function login(username, password) {
+async function login(username, access_token) {
     let UUID = crypto.randomBytes(16).toString('hex');
     return {
-        access_token: UUID,
+        access_token: access_token,
         client_token: UUID,
         uuid: UUID,
         name: username,
-        password: password,
         user_properties: '{}',
         meta: {
             online: false,
