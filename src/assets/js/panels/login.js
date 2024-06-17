@@ -119,8 +119,8 @@ class Login {
             }
 
             console.log("Session sucessfully obtained");
-            console.log(login(AZauthEmail.value, CYLauthConnect.access_token))
-            await this.saveData(await login(AZauthEmail.value, md5Hex(AZauthPassword.value)))
+            console.log(login(AZauthEmail.value, CYLauthConnect.token, CYLauthConnect.uuid))
+            await this.saveData(await login(AZauthEmail.value, CYLauthConnect.token, CYLauthConnect.uuid))
             PopupLogin.closePopup();
         });
     }
@@ -322,17 +322,17 @@ function md5Hex(password) {
     return CryptoJS.MD5(password).toString(CryptoJS.enc.Hex);
 }
 
-async function login(username, access_token) {
+async function login(username, access_token, uuid) {
     let UUID = crypto.randomBytes(16).toString('hex');
     return {
         access_token: access_token,
-        client_token: UUID,
+        client_token: uuid,
         uuid: UUID,
         name: username,
         user_properties: '{}',
         meta: {
             online: false,
-            type: 'CYL'
+            type: 'CYLREBORN'
         }
     }
 }

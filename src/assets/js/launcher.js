@@ -223,13 +223,57 @@ class Launcher {
                     this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
-                } else {
+                } else if (account.meta.type == "CYLREBORN") {
+                    console.log(`Account Type: ${account.meta.type} | Username: ${account.name} | UUID: ${account.uuid} | Email: ${account.email} | Access Token: ${account.access_token}`);
+                    popupRefresh.openPopup({
+                        title: 'Connexion',
+                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                        color: 'var(--color)',
+                        background: false
+                    });
+                    let refresh_accounts = await fetch("https://api.craftyourliferp.fr/auth/verify", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            access_token: account.access_token
+                        })
+                    });
+
+                    if (refresh_accounts.status !== 200) {
+                        this.db.deleteData('accounts', account_ID)
+                        if (account_ID == account_selected) {
+                            configClient.account_selected = null
+                            this.db.updateData('configClient', configClient)
+                        }
+                        console.error(`[Account] ${account.name}: ${refresh_accounts.errorMessage} 2`);
+                        continue;
+                    }
+                    refresh_accounts = await refresh_accounts.json();
+
+                    console.log(refresh_accounts.username !== account.name)
+                    console.log(refresh_accounts.email !== account.email)
+                    console.log(refresh_accounts.uuid !== account.client_token)
+
+                    
+
+                    if (refresh_accounts.username !== account.name || refresh_accounts.uuid !== account.client_token) {
+                        this.db.deleteData('accounts', account_ID)
+                        if (account_ID == account_selected) {
+                            configClient.account_selected = null
+                            this.db.updateData('configClient', configClient)
+                        }
+                        console.error(`[Account] ${account.name}: Invalid Account 1`);
+                        continue;
+                    }
+            } else {
                     console.error(`[Account] ${account.name}: Account Type Not Found`);
-                    /*this.db.deleteData('accounts', account_ID)
+                    this.db.deleteData('accounts', account_ID)
                     if (account_ID == account_selected) {
                         configClient.account_selected = null
                         this.db.updateData('configClient', configClient)
-                    }*/
+                    }
                 }
             }
 
