@@ -231,7 +231,7 @@ class Launcher {
                         color: 'var(--color)',
                         background: false
                     });
-                    let refresh_accounts = await fetch("https://api.craftyourliferp.fr/auth/verify", {
+                    let refresh_accounts = await fetch("https://api.craftyourliferp.fr/verify", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -256,7 +256,7 @@ class Launcher {
                     console.log(refresh_accounts.email !== account.email)
                     console.log(refresh_accounts.uuid !== account.client_token)
 
-                    
+
 
                     if (refresh_accounts.username !== account.name || refresh_accounts.uuid !== account.client_token) {
                         this.db.deleteData('accounts', account_ID)
@@ -267,7 +267,7 @@ class Launcher {
                         console.error(`[Account] ${account.name}: Invalid Account 1`);
                         continue;
                     }
-            } else {
+                } else {
                     console.error(`[Account] ${account.name}: Account Type Not Found`);
                     this.db.deleteData('accounts', account_ID)
                     if (account_ID == account_selected) {

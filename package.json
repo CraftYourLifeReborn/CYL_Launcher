@@ -1,7 +1,7 @@
 {
     "name": "CraftYourLifeRP-Launcher",
     "preductname": "CraftYourLifeRP Launcher",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Launcher pour le serveur CraftYourLifeRP Reborn",
     "main": "src/app.js",
     "author": {
@@ -9,7 +9,7 @@
         "email": "contact@luuxis.fr",
         "url": "https://github.com/CraftYourLifeReborn"
     },
-    "url": "http://141.94.98.81:25600/",
+    "url": "http://163.5.107.112:25002",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",

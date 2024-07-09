@@ -33,7 +33,7 @@ class Login {
 
     async getCYLAuth() {
         console.log('Initializing CYLAuth login...');
-        let loginURL = "https://api.craftyourliferp.fr/auth/login"
+        let loginURL = "https://api.craftyourliferp.fr/login"
         let PopupLogin = new popup();
         let loginAZauth = document.querySelector('.login-AZauth');
         let loginAZauthA2F = document.querySelector('.login-AZauth-A2F');
@@ -69,7 +69,7 @@ class Login {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    username: AZauthEmail.value,
+                    pseudo: AZauthEmail.value,
                     password: AZauthPassword.value
                 })
             })
