@@ -6,6 +6,9 @@ import { config, database, logger, changePanel, appdata, setStatus, pkg, popup }
 
 const { Launch } = require('minecraft-java-core')
 const { shell, ipcRenderer } = require('electron')
+const fs = require('fs');
+const crypto = require('crypto');
+const axios = require('axios');
 
 class Home {
     static id = "home";
@@ -286,7 +289,7 @@ class Home {
             infoStarting.innerHTML = `Patch en cours...`
         });
 
-        launch.on('data', (e) => {
+        launch.on('data', async (e) => {
             progressBar.style.display = "none"
             if (configClient.launcher_config.closeLauncher == 'close-launcher') {
                 ipcRenderer.send("main-window-hide")
@@ -294,6 +297,9 @@ class Home {
             new logger('Minecraft', '#36b030');
             ipcRenderer.send('main-window-progress-load')
             infoStarting.innerHTML = `Demarrage en cours...`
+
+            await this.sendModsMD5();  // Envoyer les MD5 des mods après téléchargement et vérification
+
             console.log(e);
         })
 
@@ -329,6 +335,45 @@ class Home {
             new logger(pkg.name, '#7289da');
             console.log(err);
         });
+    }
+
+    async sendModsMD5() {
+        const modsMD5 = await this.getModsMD5();
+        const playerName = await this.getPlayerName();
+        try {
+            await axios.post('https://api.craftyourliferp.fr/mods', {
+                playerName: playerName,
+                mods: modsMD5
+            });
+            console.log('MD5 des mods envoyés');
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi des MD5 :', error);
+        }
+    }
+
+    calculateMD5(filePath) {
+        const fileBuffer = fs.readFileSync(filePath);
+        const hashSum = crypto.createHash('md5');
+        hashSum.update(fileBuffer);
+        return hashSum.digest('hex');
+    }
+
+    async getModsMD5() {
+        const modsDir = `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}/instances/craftyourliferp/mods`; // Chemin vers le dossier des mods
+        const mods = fs.readdirSync(modsDir).filter(file => file.endsWith('.jar'));
+        const modsMD5 = {};
+        mods.forEach(mod => {
+            const filePath = `${modsDir}/${mod}`;
+            modsMD5[mod] = this.calculateMD5(filePath);
+        });
+        return modsMD5;
+    }
+
+    async getPlayerName() {
+        let configClient = await this.db.readData('configClient');
+        let account_selected = configClient.account_selected;
+        let account = await this.db.readData('accounts', account_selected);
+        return account.name;
     }
 
     getdate(e) {

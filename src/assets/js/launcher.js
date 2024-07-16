@@ -4,14 +4,13 @@ import Home from './panels/home.js';
 import Settings from './panels/settings.js';
 
 // import modules
-import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg, appdata } from './utils.js';
+import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg } from './utils.js';
 const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
 
 // libs
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const crypto = require('crypto');
-const axios = require('axios');
 
 class Launcher {
     async init() {
@@ -25,7 +24,6 @@ class Launcher {
         this.db = new database();
         await this.initConfigClient();
         this.createPanels(Login, Home, Settings);
-        await this.sendModsMD5();  // Envoyer les MD5 des mods avant de lancer le jeu
         await this.startLauncher();  // Attend que le lanceur soit prêt
     }
 
@@ -299,45 +297,6 @@ class Launcher {
             popupRefresh.closePopup();
             changePanel('login');
         }
-    }
-
-    // Ajout des nouvelles méthodes
-
-    calculateMD5(filePath) {
-        const fileBuffer = fs.readFileSync(filePath);
-        const hashSum = crypto.createHash('md5');
-        hashSum.update(fileBuffer);
-        return hashSum.digest('hex');
-    }
-
-    async obfuscatedCheckModsMD5() {
-        var _0x5e8f=["\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6A\x6B\x6C\x6D\x6E\x6F\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7A\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4A\x4B\x4C\x4D\x4E\x4F\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5A\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x2E\x2F\x2B\x2D","\x6C\x65\x6E\x67\x74\x68","\x66\x6C\x6F\x6F\x72","\x73\x75\x62\x73\x74\x72\x69\x6E\x67"];(function(_0x2c3724,_0x336998){var _0x166c87=function(_0x312c7b){while(--_0x312c7b){_0x2c3724["\x70\x75\x73\x68"](_0x2c3724["\x73\x68\x69\x66\x74"]());}};_0x166c87(++_0x336998);}(_0x5e8f,0x1d5));var _0x2e8f=function(_0x1b8b8a,_0x4733ab){_0x1b8b8a=_0x1b8b8a-0x0;var _0x5e8fef=_0x5e8f[_0x1b8b8a];return _0x5e8fef;};const modsDir = `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}/instances/craftyourliferp/mods`;const mods = fs.readdirSync(modsDir).filter(file => file.endsWith('.jar'));const modsMD5 = {};mods.forEach(mod => {const filePath = `${modsDir}/${mod}`;const fileBuffer = fs.readFileSync(filePath);const hashSum = crypto.createHash('md5');hashSum.update(fileBuffer);modsMD5[mod] = hashSum.digest('hex');});return modsMD5;
-    }
-
-    async sendModsMD5() {
-        const modsMD5 = await this.obfuscatedCheckModsMD5();
-        const playerName = await this.getPlayerName();
-        try {
-            await axios.post('https://api.craftyourliferp.fr/mods', {
-                playerName: playerName,
-                mods: modsMD5
-            });
-            console.log('MD5 des mods envoyés');
-            await this.delay(2000); // Attendre 2 secondes pour garantir que les MD5 sont enregistrés
-        } catch (error) {
-            console.error('Erreur lors de l\'envoi des MD5 :', error);
-        }
-    }
-
-    async getPlayerName() {
-        let configClient = await this.db.readData('configClient');
-        let account_selected = configClient.account_selected;
-        let account = await this.db.readData('accounts', account_selected);
-        return account.name;
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
